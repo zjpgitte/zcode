@@ -47,39 +47,141 @@ public:
             && _month == d._month 
             && _day == d._day;
     }
-    // d1 += d2 
-    Date& operator += (const Date& d)
+    // d1 != d2 
+    bool operator != (const Date& d)
     {
-        
+        return !(*this == d);
+    }
+    // d1 > d2 
+    bool operator > (const Date& d)
+    {
+        if(_year > d._year)
+        {
+            return true;
+        }
+        else if(_year == d._year)
+        {
+            if(_month > d._month)
+            {
+                return true;
+            }
+            else if(_month == d._month)
+            {
+                if(_day > d._day)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    //d1 >= d2 
+    bool operator >= (const Date& d)
+    {
+        return *this > d || *this == d;
+    }
+    // d1 < d2 
+    bool operator < (const Date& d)
+    {
+        return !(*this >= d);
+    }
+    // d1 <= d2 
+    bool operator <= (const Date& d)
+    {
+        return !(*this > d);
+    }
+
+    // d1 += d2 
+//    Date& operator += (const Date& d)
+//    {
+//        
+//
+//        return *this;
+//    }
+//    // d1 + d2 
+//    Date operator + (const Date& d)
+//    {
+//        Date temp = *this;
+//        temp += d;
+//        return temp;
+//    }
+//    // d1 - d2 
+    
+    // d + 2
+    Date operator + (int day)
+    {
+        Date temp = *this;
+        temp._day = _day + day;
+        int MonthDay[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+        //判断是否为闰年
+        if((_year % 4 == 0 && _year % 100 != 0) || _year % 400 == 0)
+        {
+            MonthDay[1] = 29;
+        }
+        //判断天数是否正确
+        while(temp._day > MonthDay[temp._month-1])
+        {
+            temp._day -= MonthDay[temp._month-1];
+            temp._month += 1;
+            if(temp._month > 12)
+            {
+                temp._year += 1;
+                temp._month = 1;
+            }
+        }
+
+        return temp;
+
+    }
+    
+    // d += 1
+    Date& operator += (int day)
+    {
+        *this = *this + day;
 
         return *this;
     }
-    // d1 + d2 
-    Date operator + (const Date& d)
-    {
-        Date temp = *this;
-        temp += d;
-        return temp;
-    }
-    // d1 - d2 
-    Date operator - (const Date& d)
-    {
-        Date temp;
-        temp._year = _year - d._year;
-        temp._month = _month - d._month;
-        temp._day = _day - d._day;
-        return temp;
-    }
-    //d1 -= d2 
-    Date& operator -= (const Date& d)
-    {
-        *this = *this - d;
-        return *this;
-    }
+
     // ++d 前置++
     Date& operator ++ ()
     {
-        (*this)._day += 1;
+        *this += 1;
+        return *this;
+    }
+    // d++ 后置++
+    Date operator ++ (int)
+    {
+        Date temp = *this;
+        *this += 1;
+        return temp;
+    }
+    // d1 - d2
+    int operator - ( Date& d)
+    {
+        int c = 1;
+        Date MaxDate = *this;
+        Date MinDate = d;
+        if(*this < d)
+        {
+            MaxDate = d;
+            MinDate = *this;
+            c = -1;
+        }
+        int n = 0;
+        while(MinDate != MaxDate)
+        {
+            MinDate++;
+            n++;
+        }
+        return c*n;
+    }
+
+    
+    void Print()
+    {
+        printf("%d-%d-%d\n",_year,_month,_day);
+        printf("\n");
     }
 private:
     int _year;
