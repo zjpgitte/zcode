@@ -21,8 +21,15 @@ int main()
    // printf("%d\n",ret);
 
    // printf("%d\n",rt);
-   Date d1(2000,1,1);
-   Date d2(3000,1,1);
-   printf("%d\n",d2-d1);
+  // Date d1(2000,1,1);
+  // Date d2(3000,1,1);
+  // printf("%d\n",d2-d1);
+     
+    Date d3(2000,2,1);
+    //d3 = d3 - 100;
+    //d3 -= 100;
+    //--d3;
+    d3--;
+    d3.Print();
     return 0;
 }

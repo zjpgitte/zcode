@@ -156,6 +156,44 @@ public:
         *this += 1;
         return temp;
     }
+    // d1 - 3
+    Date operator - (int day)
+    {
+        Date temp = *this;
+        int MonthDay[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+        while(day >= temp._day)
+        {
+            day -= temp._day;
+            temp._month--;
+            if(temp._month <= 0)
+            {
+                temp._month = 12;
+                temp._year--;
+            }
+            temp._day = MonthDay[temp._month-1];
+        }
+        temp._day -= day;
+        return temp;
+    }
+    //d -= 31
+    Date& operator -= (int day)
+    {
+        *this = *this - day;
+        return *this;
+    }
+    // --d1
+    Date& operator -- ()
+    {
+        *this -= 1;
+        return *this;
+    }
+    // d-- 
+    Date operator --(int)
+    {
+        Date temp = *this;
+        --(*this);
+        return temp;
+    }
     // d1 - d2
     int operator - ( Date& d)
     {
