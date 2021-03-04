@@ -59,6 +59,10 @@ void QueuePop(Queue *pq)
 //取队头
 QDateType QueueHead(Queue* pq)
 {
+    if(QueueEmpty(pq))
+    {
+        exit(0);
+    }
     return pq->_head->_val;
 }
 
