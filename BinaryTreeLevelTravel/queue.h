@@ -3,9 +3,10 @@
 
 #include <iostream>
 #include <assert.h>
+
 using namespace std;
 
-typedef int QDateType;
+typedef struct BTNode* QDateType;
 typedef struct QueueNode
 {
     QDateType _val;

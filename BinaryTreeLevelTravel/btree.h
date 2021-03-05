@@ -1,6 +1,6 @@
 #pragma once 
 
-typedef int BTDateType;
+typedef char BTDateType;
 
 typedef struct BTNode
 {
@@ -14,4 +14,7 @@ BTNode* BinaryTreeCreat(BTDateType *a, int *i);
 
 //层序遍历
 void BinaryTreeLevelTravel(BTNode *root);
+
+//先序遍历
+void PreOrder(BTNode *root);
 
