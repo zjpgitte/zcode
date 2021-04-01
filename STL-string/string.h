@@ -8,6 +8,7 @@ namespace zjp
 {
 class string
 {
+
 public:
     typedef char* iterator;
 public:
@@ -26,13 +27,15 @@ public:
     }
     // string s2 = s1;
     string(const string& str)
+        :_str(nullptr)
+         ,_size(0)
+         ,_capacity(0)
     {
         string temp(str._str);
         //swap(_str, str._str);
         //swap(_size, str._size);
         //swap(_capcity, str._capacity);
         swap(temp);
-        temp._str = nullptr;
     }
     //string(const string& str)
     //{
@@ -45,6 +48,7 @@ public:
     ~string()
     {
         delete[] _str;
+        _str = nullptr;
         _size = _capacity = 0;
     }
     
@@ -102,6 +106,10 @@ public:
     //改变容量大小
     void reserve(int capacity)
     {
+        if(capacity <= capacity)
+        {
+            return ;
+        }
         _capacity = capacity == 0 ? 1 : capacity;
         char *temp = (char*)realloc(_str, _capacity + 1);
         if(temp == nullptr)
@@ -112,15 +120,27 @@ public:
         _str = temp;
         
     }
-    void resize(int capacity)
+    void resize(int newSize, char ch = '\0')
     {
-        reserve(capacity);
-        while(_size != capacity)
+        if(newSize > _size)
         {
-            _str[_size++] = '\0';
+            if(newSize > _capacity)
+            {
+                //扩容
+                reserve(newSize);
+            }
+
+           while(_size != newSize)
+           {
+               _str[_size++] = ch;
+           }
+            
+           _str[_size] = '\0';
         }
-        _str[_size] = '\0';
-        _str[_size+1] = '\0';
+
+        _size = newSize;
+        _str[_size]  = '\0';
+
     }
 
     //尾插字符
@@ -151,21 +171,25 @@ public:
         insert(_size, str);
     }
 
-    void operator += (const char ch)
+    string& operator += (const char ch)
     {
         push_back(ch);
 
+        return *this;
+
     }
 
-    void operator += (char* str)
+    string& operator += (char* str)
     {
         append(str);
+        return *this;
     }
 
     //清空字符串
    void clear()
    {
        _size = 0;
+       _str[_size] = '\0';
    }
     
     //打印字符串
@@ -177,7 +201,7 @@ public:
     //判空
     bool empty() const
     {
-        return _size;
+        return !_size;
     }
 
     //比较大小
@@ -315,5 +339,32 @@ private:
     size_t _capacity;
 };
 
+
+ostream& operator << (ostream& out, const string& s)
+{
+    for(int i = 0; i < s.size(); i++)
+    {
+        cout << s[i];
+    }
+
+    return out;
 }
 
+istream& operator >> (istream& in, string& s)
+{
+    if(!s.empty())
+    {
+        s.clear();
+    }
+    char ch;
+    while((ch = getchar()) != '\n')
+    {
+        if(ch == ' ')
+        {
+            break;
+        }
+        s += ch;
+    }
+    return in;
+}
+}
