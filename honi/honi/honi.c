@@ -1,7 +1,7 @@
 #include <stdio.h>
 void move(char a, char b, int n)
 {
-	printf("把%c上的第%d个盘子移到%c上\n", a, n, b);
+	printf("Move dish %d form %c to %c\n", n, a, b);
 }
 void honi(char a, char b, char c, int n)
 {
@@ -19,7 +19,7 @@ void honi(char a, char b, char c, int n)
 int main()
 {
 	
-	honi('A', 'B', 'C', 3);
+	honi('A', 'C', 'B', 3);
 
 	system("pause");
 
