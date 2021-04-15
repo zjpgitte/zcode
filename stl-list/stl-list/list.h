@@ -70,7 +70,8 @@ namespace zjp
 		//--it
 		_list_iterator operator --() 
 		{
-			_list_ptr = _list_ptr->_next;
+			_list_ptr = _list_ptr->_prev
+				;
 			return _list_iterator(_list_ptr);
 		}
 
@@ -78,7 +79,7 @@ namespace zjp
 		_list_iterator operator --(int) 
 		{
 			node* temp = _list_ptr;
-			_list_ptr = _list_ptr->_next;
+			_list_ptr = _list_ptr->_prev;
 			return _list_iterator(temp);
 		}
 
@@ -226,6 +227,11 @@ namespace zjp
 		void pop_front()
 		{
 			erase(begin());
+		}
+
+		void pop_back()
+		{
+			erase(--end());
 		}
 		//¸Ä
 	private:

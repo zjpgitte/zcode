@@ -11,7 +11,7 @@ void TestList1()
 
 	l1.pop_front();
 	l1.pop_front();
-	l1.pop_front();
+	l1.pop_back();
 
 	zjp::list<int>::iterator it = l1.begin();
 	it = l1.insert(it, 0);
@@ -48,8 +48,8 @@ void TestList2()
 
 int main()
 {
-	//TestList1();
-	TestList2();
+	TestList1();
+	//TestList2();
 
 	system("pause");
 	return 0;
