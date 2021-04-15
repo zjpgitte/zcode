@@ -17,7 +17,7 @@ void TestVector1()
 	v1.pop_back();
 	v1.erase(v1.begin() + 2);
 
-	for (int i = 0; i < v1.size(); i++)
+	for (size_t i = 0; i < v1.size(); i++)
 	{
 		cout << v1[i] << " ";
 	}
@@ -60,7 +60,7 @@ void TestVector2()
 			it++;
 		}
 	}
-	for (int i = 0; i < v.size(); i++)
+	for (size_t i = 0; i < v.size(); i++)
 	{
 		cout << v[i] << " ";
 	}
@@ -111,7 +111,23 @@ void TestMyVector2()
 	{
 		cout << *myit << " ";
 		myit++;
+
 	}
+	cout << endl;
+}
+
+void TestMyVector3()
+{
+	zjp::vector<int> v1;
+	v1.push_back(1);
+	v1.push_back(2);
+	v1.push_back(3);
+	v1.push_back(4);
+	for (size_t i = 0; i < v1.size(); i++)
+	{
+		cout << v1[i] << " ";
+	}
+	
 	cout << endl;
 }
 
@@ -120,7 +136,8 @@ int main()
 	
 	//TestVector1();
 	//TestVector2();
-	TestMyVector2();
+	//TestMyVector2();
+	TestMyVector3();
 	system("pause");
 	return 0;
 }
