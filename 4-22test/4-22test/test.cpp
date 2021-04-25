@@ -21,28 +21,38 @@ bool Is(const string& A)
 
 int main()
 {
-	string A;
-	string B;
-	cin >> A;
-	cin >> B;
+	string s("1234");
 
+	int ret = stoi(s);
 
-	int count = 0;
-	for (size_t i = 0; i < A.size(); i++)
-	{
-		string Acopy(A);
-		//在i插入B串
-		Acopy.insert(i, B);
-		if (Is(Acopy))
-		{
-			count++;
-		}
-	}
-
-	cout << count;
-
+	cout << ret << endl;
 	return 0;
 }
+
+//int main()
+//{
+//	string A;
+//	string B;
+//	cin >> A;
+//	cin >> B;
+//
+//
+//	int count = 0;
+//	for (size_t i = 0; i < A.size(); i++)
+//	{
+//		string Acopy(A);
+//		//在i插入B串
+//		Acopy.insert(i, B);
+//		if (Is(Acopy))
+//		{
+//			count++;
+//		}
+//	}
+//
+//	cout << count;
+//
+//	return 0;
+//}
 
 
 //#include <iostream>
