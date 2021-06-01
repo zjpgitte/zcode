@@ -100,7 +100,7 @@ public:
 	//  40    subLR
 	void RotateR(TreeNode* parent)
 	{
-		TreeNode* subL = parent;
+		TreeNode* subL = parent->_left;
 		TreeNode* subLR = subL->_right;
 		
 		// 旋转
@@ -187,7 +187,7 @@ public:
 				}
 
 				//更新完平衡因子判断是否失衡
-				if (parent->_bf >= 2)
+				if (abs(parent->_bf) >= 2)
 				{
 					// 若失衡调平衡然后退出循环插入结束
 					// 调平衡对应两种情况
@@ -207,24 +207,27 @@ public:
 					{
 						// 左右双旋(先对cur左单选，再对parent做右单旋)
 						TreeNode* curR = cur->_right;
+						int bf = curR->_bf;
 						RotateL(cur);
 						RotateR(parent);
-						if (curR->_bf == 1)
+						if (bf == 1)
 						{
 							cur->_bf = -1;
 							parent = 0;
+							curR->_bf = 0;
 						}
-						else if (curR->_bf == -1)
+						else if (bf == -1)
 						{
 							cur->_bf = 0;
 							parent->_bf = 1;
+							curR->_bf = 0;
 						}
 						else
 						{
 							assert(false);
 						}
 					}
-
+					break;
 				}
 				else // 没失衡继续向上更新平衡因子
 				{
@@ -255,7 +258,7 @@ public:
 				}
 
 				// 更新完判断是否失衡
-				if (parent->_bf >= 2)
+				if (abs(parent->_bf) >= 2)
 				{	//    60 parent
 					//  50 cur
 					//40 
@@ -266,16 +269,36 @@ public:
 						RotateR(cur);
 					}
 					else
-						//   30 parent          30
-						//     50 cur         20  50
+						//   30 parent          30 parent
+						//     50 cur         20  50 cur
 						//   40                 40   60
-                        //                          
+                        //                        35     
 					{
 						// 右左双旋
+						TreeNode* curL = cur->_left;
+						int bf = curL->_bf;
 						RotateR(cur);
 						RotateL(parent);
+						// 更新平衡因子
+						if (bf == 1)
+						{
+							curL->_bf = 0;
+							parent->_bf = -1;
+							cur->_bf = 0;
+						}
+						else if (bf == -1)
+						{
+							curL->_bf = 0;
+							parent->_bf = 0;
+							cur->_bf = 1;
+						}
+						else
+						{
+							assert(false);
+						}
+						
 					}
-					
+					break;
 				}
 				else
 				{
