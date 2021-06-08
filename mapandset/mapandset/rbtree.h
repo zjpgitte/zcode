@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -28,28 +29,171 @@ struct RBTreeNode
 	{}
 };
 
+template <class T, class Ref, class Ptr>
+class RBTreeIterator
+{
+public:
+	typedef RBTreeNode<T> TreeNode;
+	typedef RBTreeIterator<T, Ref, Ptr> self;
+public:
+	RBTreeIterator(TreeNode* temp = nullptr)
+		:_it(temp)
+	{}
+
+
+
+	// ++it
+	self operator ++ ()
+	{
+		// it 走右子树
+		if (_it->_right)
+		{
+			_it = _it->_right;
+		}
+		else
+		{
+			TreeNode* cur = _it;
+			TreeNode* parent = cur->_parent;
+			while (parent && parent->_right == cur)
+			{
+				cur = parent;
+				parent = parent->_parent;
+			}
+
+			_it = parent;
+		}
+	}
+
+	// --it
+	self operator -- ()
+	{
+
+	}
+	// *it
+	Ref operator * () 
+	{
+		return _it->_t;
+	}
+
+	// it->
+	Ptr operator ->()
+	{
+		return &_it->_t;
+	}
+
+private:
+	TreeNode* _it;
+};
+
 template <class K, class T, class KOfT> // 若封装set，T = K； 若封装map，T = pair<K, V>;
 class RBTree
 {
 public:
-	class RBTreeIterator
-	{
-	public:
-		RBTreeIterator(TreeNode* temp = nullptr)
-			:_it(temp)
-		{}
-
-	private:
-		TreeNode* _it;
-	};
-public:
 	typedef RBTreeNode<T> TreeNode;
-	typedef RBTreeIterator iterator;
+	typedef RBTreeIterator<T, T&, T*> iterator;
+public:
 	RBTree()
 		:_root(nullptr)
 	{}
 
-	pair<iterator, bool> insert(const T& t)
+	// begin()
+	iterator begin()
+	{
+		TreeNode* cur = _root;
+		while (cur->_left)
+		{
+			cur = cur->_left;
+		}
+
+		return iterator(cur);
+	}
+
+	// end()
+	iterator end()
+	{
+		TreeNode* cur = _root;
+		while (cur->_right)
+		{
+			cur = cur->_right;
+		}
+
+		return iterator(cur);
+	}
+
+	void RotateLeft(TreeNode* cur)
+	{
+		TreeNode* subR = cur->_right;
+		TreeNode* subRL = subR->_left;
+
+		cur->_right = subRL;
+		if (subRL)
+		{
+			subRL->_parent = cur;
+		}
+
+		TreeNode* curParent = cur->_parent;
+		subR->_left = cur;
+		cur->_parent = subR;
+		subR->_parent = curParent;
+		if (_root == cur)
+		{
+			_root = subR;
+		}
+		else if (cur == curParent->_left)
+		{
+			curParent->_left = subR;
+		}
+		else if (cur == curParent->_right)
+		{
+			curParent->_right = subR;
+		}
+		else
+		{
+			assert(false);
+		}
+
+		subR->_col = BLACK;
+		cur->_col = subR->_right->_col = RED;
+	}
+
+	void RotateRight(TreeNode* cur)
+	{
+		TreeNode* subL = cur->_left;
+		TreeNode* subLR = subL->_right;
+
+		cur->_left = subLR;
+		if (subLR)
+		{
+			subLR->_parent = cur;
+		}
+
+		TreeNode* curParent = cur->_parent;
+		subL->_right = cur;
+		cur->_parent = subL;
+		
+		subL->_parent = curParent;
+		if (curParent == nullptr)
+		{
+			_root = subL;
+		}
+		else if (curParent->_left == cur)
+		{
+			curParent->_left = subL;
+		}
+		else if (curParent->_right == cur)
+		{
+			curParent->_right = subL;
+		}
+		else
+		{
+			assert(false);
+		}
+
+		subL->_col = BLACK;
+		subL->_left->_col = cur->_col = RED;
+	}
+
+	pair<iterator, bool> insert(T& t)
 	{
 		KOfT kot;
 		K key = kot(t); // 插入元素的key
@@ -121,7 +265,9 @@ public:
 					else
 					{
 						RotateRight(parent);
-						RotateLeft(cur);
+						RotateLeft(gFather);
+						cur->_col = BLACK;
+						gFather->_col = parent->_col = RED;
 					}
 				}
 				else
@@ -134,6 +280,8 @@ public:
 					{
 						RotateRight(parent);
 						RotateLeft(cur);
+						cur->_col = BLACK;
+						gFather->_col = parent->_col = RED;
 					}
 				}
 
@@ -145,7 +293,6 @@ public:
 
 		// 2.插入到了2结点下面或3结点的父结点下面(均是黑色结点)不做任何调整
 		return make_pair(iterator(newnode), true);
-
 	}
 
 private:

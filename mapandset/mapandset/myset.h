@@ -16,12 +16,17 @@ template <class K>
 class myset
 {
 public:
-	typedef RBTree<K, const K, SetKOfT> RBTree;
+	typedef RBTree<K, const K, SetKOfT<K>> RBTree;
 	typedef RBTree::iterator iterator;
 
 	pair<iterator, bool> insert(const K& key)
 	{
 		return _rb.insert(key);
+	}
+
+	iterator begin()
+	{
+		return _rb.begin();
 	}
 
 private:

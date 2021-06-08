@@ -6,6 +6,12 @@
 void testMySet()
 {
 	myset<int> s;
+	s.insert(2);
+	s.insert(3);
+	s.insert(4);
+
+	myset<int>::iterator it = s.begin();
+	*it = 2;
 
 }
 
@@ -36,8 +42,8 @@ void testMap()
 	m.insert(make_pair(4, 2));
 
 	map<int, int>::iterator it = m.find(3);
-	it->first = 3;
-	it->second = 3;
+	(*it).first = 3;
+	(*it).second = 3;
 
 }
 
@@ -47,6 +53,7 @@ int main()
 	testMyMap();
 	//testSet();
 	//testMap();
+
 
 	system("pause");
 	return 0;
