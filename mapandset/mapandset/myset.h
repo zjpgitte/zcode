@@ -17,7 +17,7 @@ class myset
 {
 public:
 	typedef RBTree<K, const K, SetKOfT<K>> RBTree;
-	typedef RBTree::iterator iterator;
+	typedef typename RBTree::iterator iterator;
 
 	pair<iterator, bool> insert(const K& key)
 	{
@@ -28,6 +28,13 @@ public:
 	{
 		return _rb.begin();
 	}
+
+	iterator end()
+	{
+		return _rb.end();
+	}
+
+	
 
 private:
 	RBTree _rb;

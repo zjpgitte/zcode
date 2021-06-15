@@ -16,12 +16,22 @@ template <class K, class V>
 class mymap
 {
 public:
-	typedef RBTree<K, pair<const K, V>, MapKOfT> RBTree;
-	typedef RBTree::iterator iterator;
+	typedef typename RBTree<K, pair<const K, V>, MapKOfT<K, V>> RBTree;
+	typedef typename RBTree::iterator iterator;
 
 	pair<iterator, bool> insert(const pair<K, V>& key)
 	{
 		return _rb.insert(key);
+	}
+
+	iterator begin()
+	{
+		return _rb.begin();
+	}
+
+	iterator end()
+	{
+		return _rb.end();
 	}
 
 private:

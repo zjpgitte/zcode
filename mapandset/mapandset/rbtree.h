@@ -40,20 +40,54 @@ public:
 		:_it(temp)
 	{}
 
-
-
 	// ++it
 	self operator ++ ()
 	{
-		// it 走右子树
+		assert(_it);
+		//右存在,走右子树的最左结点
 		if (_it->_right)
 		{
-			_it = _it->_right;
+			TreeNode* left = _it->_right;
+			while (left->_left)
+			{
+				left = left->_left;
+			}
+
+			_it = left;
 		}
-		else
+		else // 右不存在往上走
 		{
 			TreeNode* cur = _it;
 			TreeNode* parent = cur->_parent;
+			while (parent && parent->_right == cur)
+			{
+				cur = parent;
+				parent = cur->_parent;
+			}
+
+			_it = parent;
+		}
+		return _it;
+	}
+
+	// --it
+	self operator -- ()
+	{
+		assert(_it); // _it 为null的时候说明走到end()处，不应该再++
+		if (_it->_left) // 左树存在往左子树的最右边走
+		{
+			TreeNode* right = _it->_left;
+			while (right->_right)
+			{
+				right = right->_right;
+			}
+
+			_it = right;
+		}
+		else // 左树不存在往上走
+		{
+			TreeNode* parent = _it->_parent;
+			TreeNode* cur = _it;
 			while (parent && parent->_right == cur)
 			{
 				cur = parent;
@@ -62,12 +96,7 @@ public:
 
 			_it = parent;
 		}
-	}
-
-	// --it
-	self operator -- ()
-	{
-
+		return _it;
 	}
 	// *it
 	Ref operator * () 
@@ -79,6 +108,16 @@ public:
 	Ptr operator ->()
 	{
 		return &_it->_t;
+	}
+
+	bool operator == (const self& it)
+	{
+		return _it == it._it;
+	}
+
+	bool operator != (const self& it)
+	{
+		return _it != it._it;
 	}
 
 private:
@@ -111,15 +150,13 @@ public:
 	// end()
 	iterator end()
 	{
-		TreeNode* cur = _root;
-		while (cur->_right)
-		{
-			cur = cur->_right;
-		}
-
-		return iterator(cur);
+		return iterator(nullptr);
 	}
 
+
+	//   1
+	//     2
+	//       3
 	void RotateLeft(TreeNode* cur)
 	{
 		TreeNode* subR = cur->_right;
@@ -135,7 +172,7 @@ public:
 		subR->_left = cur;
 		cur->_parent = subR;
 		subR->_parent = curParent;
-		if (_root == cur)
+		if (curParent == nullptr)
 		{
 			_root = subR;
 		}
@@ -153,9 +190,16 @@ public:
 		}
 
 		subR->_col = BLACK;
-		cur->_col = subR->_right->_col = RED;
+		cur->_col = RED;
+		if (subR->_right)
+		{
+			subR->_right->_col = RED;
+		}
 	}
 
+	//      4
+	//    3
+	//   1
 	void RotateRight(TreeNode* cur)
 	{
 		TreeNode* subL = cur->_left;
@@ -190,7 +234,11 @@ public:
 		}
 
 		subL->_col = BLACK;
-		subL->_left->_col = cur->_col = RED;
+		if (subL->_left )
+		{
+			subL->_left->_col = RED;
+		}
+		cur->_col = RED;
 	}
 
 	pair<iterator, bool> insert(T& t)
@@ -256,16 +304,23 @@ public:
 			{
 				// 这时3结点变成了不满足条件的4结点,这时需要做的就是
 				// 通过旋转将中间结点变成黑结点，左右孩子结点变成红结点
+				
 				if (gFather->_left == parent)
 				{
 					if (cur == parent->_left)
 					{
-						RotateLeft(parent);
+						//    4
+						//  3
+						// 1
+						RotateLeft(gFather);
 					}
 					else
 					{
-						RotateRight(parent);
-						RotateLeft(gFather);
+						//   5
+						// 3
+						//  4
+						RotateLeft(parent);
+						RotateRight(gFather);
 						cur->_col = BLACK;
 						gFather->_col = parent->_col = RED;
 					}
@@ -274,12 +329,18 @@ public:
 				{
 					if (cur == parent->_right)
 					{
-						RotateRight(parent);
+						//  1
+						//    2
+						 //     3
+						RotateLeft(gFather);
 					}
 					else
 					{
+						//   1 
+						//     3
+						//   2
 						RotateRight(parent);
-						RotateLeft(cur);
+						RotateLeft(gFather);
 						cur->_col = BLACK;
 						gFather->_col = parent->_col = RED;
 					}

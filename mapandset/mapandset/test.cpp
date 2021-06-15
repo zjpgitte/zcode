@@ -6,12 +6,22 @@
 void testMySet()
 {
 	myset<int> s;
-	s.insert(2);
+	s.insert(8);
+	s.insert(9);
+	s.insert(7);
 	s.insert(3);
 	s.insert(4);
+	s.insert(6);
+	s.insert(1);
+	s.insert(2);
 
 	myset<int>::iterator it = s.begin();
-	*it = 2;
+	while (it != s.end())
+	{
+		cout << *it << " ";
+		++it;
+	}
+	cout << endl;
 
 }
 
@@ -30,7 +40,7 @@ void testSet()
 	s.insert(5);
 
 	set<int>::iterator it = s.find(5);
-	*it = 6;
+	//*it = 6;
 }
 
 void testMap()
@@ -42,7 +52,7 @@ void testMap()
 	m.insert(make_pair(4, 2));
 
 	map<int, int>::iterator it = m.find(3);
-	(*it).first = 3;
+	//(*it).first = 3;
 	(*it).second = 3;
 
 }
@@ -50,7 +60,7 @@ void testMap()
 int main()
 {
 	testMySet();
-	testMyMap();
+	//testMyMap();
 	//testSet();
 	//testMap();
 
