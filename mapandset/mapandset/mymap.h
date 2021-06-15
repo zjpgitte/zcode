@@ -34,6 +34,13 @@ public:
 		return _rb.end();
 	}
 
+	V& operator [] (const K& key)
+	{
+		pair<iterator, bool> ret = insert(pair<K, V>(key, V()));
+
+		return ret.first->second;
+	}
+
 private:
 	RBTree _rb;
 };

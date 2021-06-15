@@ -28,6 +28,21 @@ void testMySet()
 void testMyMap()
 {
 	mymap<string, int> m;
+	m["hello"]++;
+	m["hello"]++;
+	m["ok"]++;
+	m["hi"]++;
+	m["apple"]++;
+	m["apple"]++;
+	m["apple"]++;
+	m["apple"]++;
+	m["apple"]++;
+	m["banana"]++;
+
+	for (auto& e: m)
+	{
+		cout  << ":" << e.second << endl;
+	}
 }
 
 void testSet()
@@ -45,22 +60,24 @@ void testSet()
 
 void testMap()
 {
-	map<int, int> m;
-	m.insert(make_pair(1, 2));
-	m.insert(make_pair(2, 2));
-	m.insert(make_pair(3, 2));
-	m.insert(make_pair(4, 2));
+	//map<string, int> m;
+	/*m["hello"]++;
+	m["hello"]++;
+	m["ok"]++;
+	m["hi"]++;
+	m["apple"]++;
+	m["banana"]++;
 
-	map<int, int>::iterator it = m.find(3);
-	//(*it).first = 3;
-	(*it).second = 3;
-
+	for (auto& e: m)
+	{
+		cout << e.first << ":" << e.second << endl;
+	}*/
 }
 
 int main()
 {
-	testMySet();
-	//testMyMap();
+	//testMySet();
+	testMyMap();
 	//testSet();
 	//testMap();
 

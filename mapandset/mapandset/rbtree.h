@@ -241,7 +241,7 @@ public:
 		cur->_col = RED;
 	}
 
-	pair<iterator, bool> insert(T& t)
+	pair<iterator, bool> insert(const T& t)
 	{
 		KOfT kot;
 		K key = kot(t); // ²åÈëÔªËØµÄkey
@@ -268,7 +268,7 @@ public:
 			}
 			else
 			{
-				return make_pair((nullptr), false);
+				return make_pair((cur), false);
 			}
 		}
 
