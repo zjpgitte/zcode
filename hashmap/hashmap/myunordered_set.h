@@ -19,6 +19,16 @@ namespace close
 			return _ht.insert(key);
 		}
 
+		int find(const K& key)
+		{
+			return _ht.find(key);
+		}
+
+		bool erase(const K& key)
+		{
+			return _ht.erase(key);
+		}
+
 	private:
 		close::HashTable<K, K, SETKOT<K>> _ht;
 	};

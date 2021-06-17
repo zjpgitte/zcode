@@ -102,6 +102,7 @@ namespace close // 闭散列解决冲突
 			// 找到EMPTY位置或DELETE位置可以插入
 			_table[index]._state = EXISTS;
 			_table[index]._t = val;
+			_size++;
 			return true;
 		}
 
@@ -126,6 +127,18 @@ namespace close // 闭散列解决冲突
 				return index;
 			}
 
+		}
+
+		bool erase(const K& key)
+		{
+			int index = find(key);
+			if (index == -1)
+			{
+				return false;
+			}
+			_table[index]._state = DELETE;
+
+			return true;
 		}
 
 	private:

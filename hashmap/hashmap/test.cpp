@@ -36,6 +36,28 @@ void testMyUnordered_set()
 	s.insert(1);
 	s.insert(2);
 	s.insert(3);
+	s.insert(3);
+	s.insert(5);
+	s.insert(8);
+
+	int find = s.find(1);
+
+	s.erase(3);
+
+}
+
+void testMyUnordered_map()
+{
+	close::myunordered_map<int, int> m;
+
+	m.insert(make_pair(1, 1));
+	m.insert(make_pair(2, 1));
+	m.insert(make_pair(3, 1));
+	m.insert(make_pair(4, 1));
+
+	int find = m.find(3);
+
+	m.erase(1);
 }
 
 int main()
@@ -43,7 +65,9 @@ int main()
 	
 	//testSpeed();
 
-	testMyUnordered_set();
+	//testMyUnordered_set();
+
+	testMyUnordered_map();
 	
 	system("pause");
 	return 0;
