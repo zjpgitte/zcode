@@ -9,7 +9,7 @@ using namespace std;
 namespace open
 {
 	template <class K>
-	class HASH
+	struct HASH
 	{
 		int operator ()(const K& key, int size)
 		{
@@ -19,12 +19,12 @@ namespace open
 
 	// 模板特化
 	template<>
-	class HASH<string>
+	struct HASH<string>
 	{
 		int operator()(const string& s, int size)
 		{
-			int sum = 0;
-			for (int i = 0; i < s.size(); i++)
+			size_t sum = 0;
+			for (size_t i = 0; i < s.size(); i++)
 			{
 				sum = sum * 131 + s[i];
 			}
@@ -33,24 +33,112 @@ namespace open
 		}
 	};
 
-	template <class T>
-	struct ListNode
-	{
-		T _t;
-		ListNode<T>* _next;
+	// 模板的声明
+	template <class K, class T, class KOT, class HASHFUNC >
+	class HashTable;
 
-		ListNode(const T& t = t())
-			:_t(t)
-			, _next(nullptr)
+	template < class K, class T, class Ptr, class Ref, class KOT, class HASHFUNC>
+	class HashIterator
+	{
+	public:
+		typedef typename HashTable<K, T, KOT, HASHFUNC> HashTable;
+		typedef typename HashTable::ListNode Node;
+		typedef HashIterator<K, T,  Ptr,  Ref,  KOT,  HASHFUNC> self;
+	public:
+		size_t hash(const K& key, int size)
+		{
+			HASHFUNC hf;
+			return hf(key, size);
+		}
+	public:
+		HashIterator(Node* node = nullptr, HashTable* pht = nullptr)
+			:_node(node)
+			, _pht(pht)
 		{}
 
+		HashIterator(const self& node)
+			:_node(node._node)
+		{}
+
+		bool operator == (const self& it)
+		{
+			return _node == it._node;
+		}
+
+		bool operator != (const self& it)
+		{
+			return _node != it._node;
+		}
+
+		self operator ++ ()
+		{
+			KOT kot;
+			if (_node->_next != nullptr)
+			{
+				_node = _node->_next;			
+			}
+			else
+			{
+				size_t index = hash(kot(_node->_t), _pht->_table.size());
+				for (size_t i = index + 1; i < _pht->_table.size(); i++)
+				{
+					if (_pht->_table[i] != nullptr)
+					{
+						_node = _pht->_table[i];
+						return self(_node, _pht);
+					}
+				}
+
+				_node = nullptr;
+			}
+
+			return self(_node, _pht);
+		}
+
+		Ref operator * ()
+		{
+			return _node->_t;
+		}
+
+		Ptr operator -> ()
+		{
+			return &_node->_t;
+		}
+
+	private:
+		Node* _node;
+		HashTable* _pht;
 	};
 
 	template <class K, class T, class KOT, class HASHFUNC = HASH<K>>
 	class HashTable
 	{
+		
 	public:
-		typedef ListNode<T> Node;
+		struct ListNode
+		{
+			T _t;
+			ListNode* _next;
+
+			ListNode(const T& t = t())
+				:_t(t)
+				, _next(nullptr)
+			{}
+		};
+
+		int hash(const K& key, int size)
+		{
+			HASHFUNC hf;
+			return hf(key, size);
+		}
+	public:
+		typedef ListNode Node;
+		typedef typename HashIterator<K, T, T*, T&, KOT, HASHFUNC> HashIterator;
+		//typedef typename HashIterator<K, T, const T*, const T&, KOT, HASHFUNC> Const_HashIterator;
+		typedef typename HashIterator Iterator;
+	//	typedef typename Const_HashIterator const_Iterator;
+	public:
+		friend HashIterator;
 	public:
 		HashTable(int capacity = 3)
 			:_size(0)
@@ -58,10 +146,22 @@ namespace open
 			_table.resize(capacity);
 		}
 
-		int hash(const K& key, int size)
+		Iterator begin()
 		{
-			HASHFUNC hf;
-			return hf(key, size);
+			for (size_t i = 0; i < _table.size(); i++)
+			{
+				if (_table[i] != nullptr)
+				{
+					return Iterator(_table[i], this);
+				}
+			}
+
+			return end();
+		}
+
+		Iterator end()
+		{
+			return Iterator(nullptr, this);
 		}
 
 		void check()
@@ -75,7 +175,7 @@ namespace open
 				int newsize = _size * 2;
 				vector<Node*> newtable;
 				newtable.resize(newsize);
-				for (int i = 0; i < _table.size(); i++)
+				for (size_t i = 0; i < _table.size(); i++)
 				{
 					Node* cur = _table[i];
 					while (cur)
@@ -87,22 +187,26 @@ namespace open
 						int newindex = hash(kot(cur->_t), newsize);
 						cur->_next = newtable[newindex];
 						newtable[newindex] = cur;
+
+						cur = next;
 					}
 				}
+				newtable.swap(_table);
 			}
 		}
 
-		pair<Node*, bool> insert(const T& t)
+		pair<Iterator, bool> insert(const T& t)
 		{
+			KOT kot;
 			// 检查扩容
 			check();
 			// 判断原哈希表是否有该元素,若有返回false
-			Node* findNode = find(t);
+			Node* findNode = find(kot(t));
 			if (findNode)
 			{
 				return make_pair(findNode, false);
 			}
-			KOT kot;
+			
 			int index = hash(kot(t), _table.size());
 			
 			Node*& head = _table[index];
@@ -112,13 +216,13 @@ namespace open
 			head = newnode;
 			_size++;
 			
-			return make_pair(head, true);
+			return make_pair(Iterator(head), true);
 		}
 
 		Node* find(const K& key)
 		{
 			KOT kot;
-			int index = hash(key);
+			int index = hash(key, _table.size());
 			Node* cur = _table[index];
 
 			while (cur)
@@ -139,7 +243,7 @@ namespace open
 		bool erase(const K& key)
 		{
 			
-			int index = hash(key); // 找到头结点
+			int index = hash(key, _table.size()); // 找到头结点
 			Node* del = find(key);
 			if (del == nullptr)
 			{
@@ -151,6 +255,7 @@ namespace open
 				// 头删
 				_table[index] = del->_next;
 				delete del;
+				--_size;
 				return true;
 			}
 			// 中间删
@@ -160,11 +265,12 @@ namespace open
 			}
 			prev->_next = del->_next;
 			delete del;
+			--_size;
 			return true;
 		}
 
 	private:
 		size_t _size;
-		vector<ListNode<T>*> _table;
+		vector<Node*> _table;
 	};
 }
