@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <ctime>
+#include <algorithm>
 
 using namespace std;
 
@@ -139,6 +140,12 @@ namespace close // ±ÕÉ¢ÁÐ½â¾ö³åÍ»
 			_table[index]._state = DELETE;
 
 			return true;
+		}
+
+		void swap(HashTable& ht)
+		{
+			_table.swap(ht._table);
+			std::swap(_size, ht._size);
 		}
 
 	private:

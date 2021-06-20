@@ -20,6 +20,16 @@ namespace open
 		typedef typename HashTable::Iterator iterator;
 	public:
 		
+		iterator begin()
+		{
+			return _ht.begin();
+		}
+
+		iterator end()
+		{
+			return _ht.end();
+		}
+
 		pair<iterator, bool> insert(const K& key)
 		{
 			return _ht.insert(key);

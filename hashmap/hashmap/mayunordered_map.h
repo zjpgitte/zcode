@@ -32,5 +32,10 @@ namespace close
 			return _ht.erase(key);
 		}
 
+		void swap(myunordered_map& m)
+		{
+			_ht.swap(m._ht);
+		}
+
 	};
 }

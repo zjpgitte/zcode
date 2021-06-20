@@ -29,8 +29,6 @@ void testMyMap()
 		cout << (*it).first << ": " << (*it).second << endl;
 		++it;
  	}
-
-
 }
 
 void testMySet()

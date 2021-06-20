@@ -43,6 +43,8 @@ namespace open
 	public:
 		typedef typename HashTable<K, T, KOT, HASHFUNC> HashTable;
 		typedef typename HashTable::ListNode Node;
+
+		// 将迭代器声明为友元
 		typedef HashIterator<K, T,  Ptr,  Ref,  KOT,  HASHFUNC> self;
 	public:
 		size_t hash(const K& key, int size)
@@ -70,7 +72,7 @@ namespace open
 			return _node != it._node;
 		}
 
-		self operator ++ ()
+		self& operator ++ ()
 		{
 			KOT kot;
 			if (_node->_next != nullptr)
@@ -85,15 +87,17 @@ namespace open
 					if (_pht->_table[i] != nullptr)
 					{
 						_node = _pht->_table[i];
-						return self(_node, _pht);
+						return *this;
 					}
 				}
 
 				_node = nullptr;
 			}
 
-			return self(_node, _pht);
+			return *this;
 		}
+
+		// 单项迭代器不需要--
 
 		Ref operator * ()
 		{

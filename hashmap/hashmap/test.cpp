@@ -58,6 +58,9 @@ void testMyUnordered_map()
 	int find = m.find(3);
 
 	m.erase(1);
+
+	close::myunordered_map<int, int> m1;
+	m.swap(m1);
 }
 
 int main()
