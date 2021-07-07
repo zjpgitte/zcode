@@ -3,13 +3,13 @@
 
 class TreeNode {
 private:
-	int _val;
-	TreeNode* _left;
-	TreeNode* _right;
+	int _val = 0;
+	TreeNode* _left = nullptr;
+	TreeNode* _right = nullptr;
 };
 
 void TestObj(){
-	int n = 10000000;
+	int n = 1000000;
 	ObjPool<TreeNode> obj;
 	int begin1 = clock();
 	for (int i = 0; i < n; i++) {
@@ -30,6 +30,9 @@ void TestObj(){
 int main(){
 
 	TestObj();
+
+	//int *a = (int*)malloc(sizeof(int));
+	//int *b = (int*)calloc(4, sizeof(int)); // 分配四个int大小的内存,并初始化为0
 
 	system("pause");
 

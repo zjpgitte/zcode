@@ -28,6 +28,7 @@ public:
 			obj = (T*)_memery;
 			(char*)_memery += (sizeof(T));
 			_remainSize -= sizeof(T);
+			new(obj)T;
 			return obj;
 		}
 	}
