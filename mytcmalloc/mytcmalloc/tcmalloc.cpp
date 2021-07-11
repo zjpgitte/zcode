@@ -2,8 +2,8 @@
 #include "common.h"
 #include "ThreadCache.h"
 
-void* tcmalloc(size_t size) {
-
+void* tcmalloc(size_t sizes) {
+	size_t size = SizeClass::RoundUp(sizes);
 	if (size <= MAX_SIZE) { //小于64k到threadcache要
 
 		// 每个线程都创建一个私有的threadCache。
@@ -14,5 +14,6 @@ void* tcmalloc(size_t size) {
 	}
 	else { // 大于64k到pagecache要
 		// pache alloc
+		return nullptr;
 	}
 }

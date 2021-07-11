@@ -1,5 +1,6 @@
 
 #pragma once
+#pragma once
 
 #include "common.h"
 
@@ -15,5 +16,5 @@ public:
 	void* FetchFromCentralCache(size_t size);
 
 private:
-	FreeList freeList[16];
+	FreeList _freeList[NFREELISTS];
 };

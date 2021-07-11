@@ -7,7 +7,7 @@ void*& FreeList::NextObj(void* obj){
 }
 
 bool FreeList::Empty(){
-	return _head;
+	return _head == nullptr;
 }
 
 void FreeList::PushFront(void* obj){ // Í·²å
@@ -19,5 +19,11 @@ void* FreeList::PopFront(){ // Í·É¾
 	void* temp = _head;
 	_head = NextObj(_head);
 	return temp;
+}
+
+// Í·²å
+void FreeList::PushRange(void* start, void* end){
+	NextObj(end) = _head;
+	_head = start;
 }
 

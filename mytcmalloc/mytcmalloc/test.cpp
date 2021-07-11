@@ -4,7 +4,7 @@
 #include "tcmalloc.h"
 
 void Test(){
-	void* a = tcmalloc(10);
+	void* a = tcmalloc(1024 * 64 - 1);
 }
 
 int main(){
