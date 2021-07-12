@@ -8,7 +8,12 @@
 // 这些内存被切分成不同大小的内存，以单链表的形式链接起来
 class Span{
 public:
+	PageID _pageId;
+	size_t _n = 0;
+	size_t _useCount = 0;
+
 	void* _list = nullptr;
+
 	Span* _prev = nullptr;
 	Span* _next = nullptr;
 };
@@ -21,6 +26,9 @@ public:
 		Span* newSpan = new Span; //new换成对象池或virtualAllocate
 		newSpan->_next = newSpan;
 		newSpan->_prev = newSpan;
+	}
+	bool Empty() {
+		return _head->_next == _head;
 	}
 
 	// 链表头和尾
@@ -40,6 +48,7 @@ public:
 		s->_prev = _head;
 		_head->_next = s;
 	}
+
 	// 头删
 	Span* PopFront(){
 		Span* first = _head->_next;
@@ -52,6 +61,7 @@ public:
 		return first;
 	}
 
+
 private:
 	Span* _head;
 };
@@ -63,11 +73,15 @@ public:
 		return &_instance;
 	}
 
-	// ThreadCache从CentralCache获取一批对象。start，end分别是链表的头和尾
-	void FetchObjs(void*& start, void*& end, int num, size_t size);
+	// 从CentralCache获取n个size大小的对象
+	//  start，end是n个size内存块链接的头和尾。
+	size_t FetchObjs(size_t n, size_t size, void*& start, void*& end);
 
 	// 从list中取有对象的span
 	Span* GetOneSpan(SpanList& list, size_t size);
+
+	// 切分span
+	void DivideSpan(Span* span, size_t size);
 
 private:
 	SpanList _spanList[NFREELISTS];

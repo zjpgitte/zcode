@@ -5,11 +5,19 @@
 using std::cout;
 using std::endl;
 
+typedef size_t PageID;
+
+
 const int MAX_SIZE = 64 * 1024;
 const int NFREELISTS = 184; //threadCache的freeList和centralcache的spanList长度一样184
 const int NPAGES = 128; //  pageCache的长度是128
 
 class SizeClass{
+public:
+	// 计算size大小的内存块映射到的位置
+	// ThreadCache中的freeList表和CentralCache中的spanList表是
+	// 使用的都是这样的映射方式。
+	static size_t Index(size_t size);
 
 public:
 	// 计算不同大小内存块慢启动阈值
@@ -51,14 +59,16 @@ public:
 // FreeList挂多个大小相同的内存块
 class FreeList{
 public:
+	//慢启动相关函数。
+
 	// 获取要取的内存个数
 	int GetNextSize(){
 		return _nextSize;
 	}
 
 	// 设置待取的内存个数
-	void SetNextSize(int newSize){
-		_nextSize = newSize;
+	void UpdateNextSize(size_t size){
+		if (_nextSize < SizeClass::MaxSize(size)) _nextSize += 1;
 	}
 
 
@@ -78,5 +88,5 @@ public:
 
 private:
 	void* _head = nullptr;
-	int _nextSize = 1; // 记录下次应该从CentralCache取内存的个数
+	int _nextSize = 1; // 记录下次应该从CentralCache取内存的个数与慢启动相关。
 };

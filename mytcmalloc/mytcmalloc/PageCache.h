@@ -11,8 +11,8 @@ public:
 		return &_instance;
 	}
 
-	// pageCache取n页大小的span
-	Span* NewSpan(int n); 
+	// 向PageCache取k页大小的span
+	Span* NewSpan(int k); 
 
 private:
 	SpanList _spanList[NPAGES];
