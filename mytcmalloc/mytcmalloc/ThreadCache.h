@@ -13,6 +13,13 @@ public:
 	//向CentralCache要内存
 	void* FetchFromCentralCache(size_t size);
 
+	// 释放内存到ThreadCache
+	void DeAllocate(void* ptr, size_t size);
+
+	void JudgeListTooLong(void* ptr, size_t size);
+
 private:
 	FreeList _freeList[NFREELISTS];
 };
+
+static __declspec(thread) ThreadCache* tls_threadcache = nullptr;

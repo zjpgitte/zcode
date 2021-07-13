@@ -1,8 +1,5 @@
-
 #pragma once
 #include "common.h"
-
-
 
 // central中Span管理若干个页的内存
 // 这些内存被切分成不同大小的内存，以单链表的形式链接起来
@@ -23,9 +20,9 @@ public:
 class SpanList{
 public:
 	SpanList(){
-		Span* newSpan = new Span; //new换成对象池或virtualAllocate
-		newSpan->_next = newSpan;
-		newSpan->_prev = newSpan;
+		_head = new Span; //new换成对象池或virtualAllocate
+		_head->_next = _head;
+		_head->_prev = _head;
 	}
 	bool Empty() {
 		return _head->_next == _head;
@@ -70,6 +67,7 @@ private:
 class CentralCache{
 public:
 	static CentralCache* GetInstance(){
+
 		return &_instance;
 	}
 
@@ -83,6 +81,8 @@ public:
 	// 切分span
 	void DivideSpan(Span* span, size_t size);
 
+	void ReleaseToSpans(void* ptr, size_t n, size_t size);
+
 private:
 	SpanList _spanList[NFREELISTS];
 
@@ -92,4 +92,3 @@ private:
 	CentralCache(const CentralCache& c) = delete;
 };
 
-CentralCache CentralCache::_instance; // 定义static类型变量

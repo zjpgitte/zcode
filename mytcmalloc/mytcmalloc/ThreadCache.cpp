@@ -74,11 +74,39 @@ void* ThreadCache::FetchFromCentralCache(size_t size){
 	// 输出型参数start,end将这n个对象取出。返回实际取出的个数
 	void *start = nullptr, *end = nullptr;
 	size_t realN = CentralCache::GetInstance()->FetchObjs(n, size, start, end);
-	assert(realN > 1); 
+	assert(realN >= 1); 
 
 
 	// 取来的内存挂到freeList中，并返回第一个
-	_freeList[i].PushRange(start, end);
+	_freeList[i].PushRange(start, end, realN);
 	_freeList[i].UpdateNextSize(size); //慢启动增长
 	return _freeList[i].PopFront();
 }
+
+
+void ThreadCache::DeAllocate(void* ptr, size_t size) {
+	size_t i = SizeClass::Index(size);
+
+	// 释放内存给_freeList
+	_freeList[i].PushFront(ptr);
+
+	// 判断链表是否过长
+	JudgeListTooLong(ptr, size);
+}
+
+void ThreadCache::JudgeListTooLong(void* ptr, size_t size) {
+	size_t i = SizeClass::Index(size);
+	FreeList list = _freeList[i];
+	
+	//链表过长
+	if (list.Size() >= list.GetNextSize()) {
+		size_t n = list.GetNextSize();
+		// 取出n个对象
+		void* start;
+		list.PopRange(start, n);
+
+		// 释放给CentralCache
+		CentralCache::GetInstance()->ReleaseToSpans(start, n);
+	}
+}
+

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "common.h"
 #include "CentralCache.h"
 
@@ -14,8 +13,11 @@ public:
 	// 向PageCache取k页大小的span
 	Span* NewSpan(int k); 
 
+	// 向系统要K页
+	void* SystemAllocate(size_t k);
+
 private:
-	SpanList _spanList[NPAGES];
+	SpanList _spanList[NPAGES + 1];
 
 private:
 	static PageCache _instance;
@@ -23,4 +25,3 @@ private:
 	PageCache(const PageCache& p) = delete;
 };
 
-PageCache PageCache::_instance;

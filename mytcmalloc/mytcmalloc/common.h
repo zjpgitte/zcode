@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <assert.h>
+#include <windows.h>
 
 using std::cout;
 using std::endl;
@@ -11,6 +12,7 @@ typedef size_t PageID;
 const int MAX_SIZE = 64 * 1024;
 const int NFREELISTS = 184; //threadCache的freeList和centralcache的spanList长度一样184
 const int NPAGES = 128; //  pageCache的长度是128
+const int PAGE_SHIFT = 12;
 
 class SizeClass{
 public:
@@ -37,16 +39,16 @@ public:
 		// 对齐数 8    16   128   1024
 		//        16   72   128   184
 		if (size <= 128) {
-			return (((size >> 3) + 1) << 3);
+			return ((size + 7) >> 3) << 3;
 		}
 		else if (size <= 1024) {
-			return (((size >> 4) + 1) << 4);
+			return ((size + 15) >> 4) << 4;
 		}
 		else if (size <= 8 * 1024) {
-			return (((size >> 7) + 1) << 7);
+			return ((size + 127) >> 7) << 7;
 		}
 		else if (size <= 64 * 1024) {
-			return (((size >> 10) + 1) << 10);
+			return ((size + 1023) >> 10) << 10;
 		}
 		else {
 			assert(false);
@@ -60,7 +62,6 @@ public:
 class FreeList{
 public:
 	//慢启动相关函数。
-
 	// 获取要取的内存个数
 	int GetNextSize(){
 		return _nextSize;
@@ -73,6 +74,10 @@ public:
 
 
 public:
+	size_t Size() {
+		return _size;
+	}
+
 	static void*& NextObj(void* obj);
 
 	bool Empty();
@@ -84,9 +89,31 @@ public:
 	void* PopFront();
 
 	// 插入start开始的单链表
-	void PushRange(void* start, void* end);
+	void PushRange(void* start, void* end, size_t n);
+
+	// 弹出size个对象给start
+	void PopRange(void*& start, size_t size);
 
 private:
 	void* _head = nullptr;
 	int _nextSize = 1; // 记录下次应该从CentralCache取内存的个数与慢启动相关。
+	size_t _size = 0; // 当前对象个数
 };
+
+
+
+//向系统要kpage页内存
+inline static void* SystemAlloc(size_t kpage)
+{
+#ifdef _WIN32
+	void* ptr = VirtualAlloc(0, kpage*(1 << PAGE_SHIFT),
+		MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+#else
+	// brk mmap等
+#endif
+
+	if (ptr == nullptr)
+		throw std::bad_alloc();
+
+	return ptr;
+}
