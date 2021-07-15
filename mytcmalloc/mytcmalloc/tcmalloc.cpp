@@ -15,13 +15,16 @@ void* tcmalloc(size_t sizes) {
 	}
 	else { // 大于64k到pagecache要
 		Span* span = PageCache::GetInstance()->NewSpan(size >> PAGE_SHIFT);
+		span->_objSize = size;
 		return (void*)(span->_pageId << PAGE_SHIFT);
 	}
 }
 
-void tcfree(void* ptr, size_t size) {
+void tcfree(void* ptr) {
+	Span* span = CentralCache::MapObjToSpan(ptr);
+	size_t size = span->_objSize;
 	if (size > MAX_SIZE) {
-		// 释放内存到PageCache
+		PageCache::GetInstance()->ReleaseSpanToPageCache(span);
 		return;
 	}
 

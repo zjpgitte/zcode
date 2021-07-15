@@ -19,7 +19,7 @@ Span* CentralCache::GetOneSpan(SpanList& list, size_t size){
 	// 找PageCache要 k 页的span。
 	int k = ((SizeClass::MaxSize(size) * size) >> 10) + 1;
 	Span* span = PageCache::GetInstance()->NewSpan(k);
-
+	span->_objSize = size;
 	//将连续的span切成size大小的对象链接起来的span。
 	DivideSpan(span, size);
 
@@ -55,8 +55,8 @@ size_t CentralCache::FetchObjs(size_t n, size_t size, void*& start, void*& end){
 }
 
 void CentralCache::DivideSpan(Span* span, size_t size) {
-	char* end = (char*)((span->_pageId + span->_n) << 12);
-	char* cur = (char*)(span->_pageId << 12);
+	char* end = (char*)((span->_pageId + span->_n) << PAGE_SHIFT);
+	char* cur = (char*)(span->_pageId << PAGE_SHIFT);
 	char* next = cur + size;
 	while (next + size <= end) {
 		FreeList::NextObj(cur) = next;
@@ -71,10 +71,11 @@ void CentralCache::DivideSpan(Span* span, size_t size) {
 
 
 void CentralCache::ReleaseToSpans(void* ptr, size_t n, size_t size) {
+	size_t i = SizeClass::Index(size);
 
-	// 根据map找到每个对象对应的span
 	void *next = FreeList::NextObj(ptr);
 	while (ptr != nullptr) {
+		void *next = FreeList::NextObj(ptr);
 		// 找到ptr对象对应的span
 		Span* span = MapObjToSpan(ptr);
 		// 头插
@@ -82,10 +83,28 @@ void CentralCache::ReleaseToSpans(void* ptr, size_t n, size_t size) {
 		span->_list = ptr;
 		span->_useCount--;
 
+	    // span的对象都回来了
 		if (span->_useCount == 0) {
+			_spanList[i].Erase(span);
+			span->_list = nullptr; // list只在CentralCache中使用
 			// 释放给PageCache
+			PageCache::GetInstance()->ReleaseSpanToPageCache(span);
 		}
 
 		ptr = next;
 	}
 }
+
+
+// 根据地址求出span
+Span* CentralCache::MapObjToSpan(void* ptr) {
+	assert(ptr);
+
+	// 同一个页内的不同地址页号相同。
+	PageID id = (PageID)ptr >> 12;
+
+	auto ret = PageCache::_idSpanMap.find(id);
+
+	return ret->second;
+}
+

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <assert.h>
 #include <windows.h>
+#include <map>
 
 using std::cout;
 using std::endl;
@@ -23,7 +24,7 @@ public:
 
 public:
 	// 计算不同大小内存块慢启动阈值
-	static int MaxSize(size_t size){
+	static size_t MaxSize(size_t size){
 		int num = MAX_SIZE / size;
 
 		// 控制每次取的个数[2, 512]
@@ -63,7 +64,7 @@ class FreeList{
 public:
 	//慢启动相关函数。
 	// 获取要取的内存个数
-	int GetNextSize(){
+	size_t GetNextSize(){
 		return _nextSize;
 	}
 
@@ -75,7 +76,7 @@ public:
 
 public:
 	size_t Size() {
-		return _size;
+		return _n;
 	}
 
 	static void*& NextObj(void* obj);
@@ -96,12 +97,12 @@ public:
 
 private:
 	void* _head = nullptr;
-	int _nextSize = 1; // 记录下次应该从CentralCache取内存的个数与慢启动相关。
-	size_t _size = 0; // 当前对象个数
+	size_t _nextSize = 1; // 记录下次应该从CentralCache取内存的个数与慢启动相关。
+	size_t _n = 0; // 当前对象个数
 };
 
 
-
+// 系统调用接口
 //向系统要kpage页内存
 inline static void* SystemAlloc(size_t kpage)
 {
@@ -116,4 +117,14 @@ inline static void* SystemAlloc(size_t kpage)
 		throw std::bad_alloc();
 
 	return ptr;
+}
+
+
+inline static void SystemFree(void* ptr)
+{
+#ifdef _WIN32
+	VirtualFree(ptr, 0, MEM_RELEASE);
+#else
+	// sbrk unmmap等
+#endif
 }

@@ -5,9 +5,10 @@
 // 这些内存被切分成不同大小的内存，以单链表的形式链接起来
 class Span{
 public:
-	PageID _pageId;
-	size_t _n = 0;
-	size_t _useCount = 0;
+	PageID _pageId; // 页号
+	size_t _n = 0; // 页的个数
+	size_t _useCount = 0; //引用计数
+	size_t _objSize = 0;
 
 	void* _list = nullptr;
 
@@ -58,6 +59,15 @@ public:
 		return first;
 	}
 
+	void Erase(Span* span) {
+		Span* pre = span->_prev;
+		Span* behind = span->_next;
+
+		pre->_next = behind;
+		behind->_prev = pre;
+		span->_next = span->_prev = nullptr;
+	}
+
 
 private:
 	Span* _head;
@@ -81,7 +91,11 @@ public:
 	// 切分span
 	void DivideSpan(Span* span, size_t size);
 
+	// 释放n对象给Central中的span
 	void ReleaseToSpans(void* ptr, size_t n, size_t size);
+
+	// 根据地址求出span。
+	static Span* MapObjToSpan(void* ptr);
 
 private:
 	SpanList _spanList[NFREELISTS];

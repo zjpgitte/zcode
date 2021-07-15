@@ -16,6 +16,14 @@ public:
 	// 向系统要K页
 	void* SystemAllocate(size_t k);
 
+	// 想系统释放
+	void SystemFree(void* ptr);
+
+	//span释放给PageCache
+	void ReleaseSpanToPageCache(Span* span);
+
+public:
+	static std::map<PageID, Span*> _idSpanMap; // 建立页号和span的映射关系的表
 private:
 	SpanList _spanList[NPAGES + 1];
 

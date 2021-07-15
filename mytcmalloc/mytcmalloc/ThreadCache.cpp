@@ -3,7 +3,6 @@
 #include "common.h"
 #include "CentralCache.h"
 
-
 // STL的空间配置器是有 8 字节对齐 [8, 128]
 // 最小申请8字节，最多128字节。大于128字节的直接malloc
 // STL的空间配置器主要是给容器使用的，容器的每个元素一般不超过128字节。
@@ -96,7 +95,7 @@ void ThreadCache::DeAllocate(void* ptr, size_t size) {
 
 void ThreadCache::JudgeListTooLong(void* ptr, size_t size) {
 	size_t i = SizeClass::Index(size);
-	FreeList list = _freeList[i];
+	FreeList& list = _freeList[i];
 	
 	//链表过长
 	if (list.Size() >= list.GetNextSize()) {
@@ -106,7 +105,7 @@ void ThreadCache::JudgeListTooLong(void* ptr, size_t size) {
 		list.PopRange(start, n);
 
 		// 释放给CentralCache
-		CentralCache::GetInstance()->ReleaseToSpans(start, n);
+		CentralCache::GetInstance()->ReleaseToSpans(start, n, size);
 	}
 }
 

@@ -10,16 +10,18 @@ bool FreeList::Empty(){
 	return _head == nullptr;
 }
 
-void FreeList::PushFront(void* obj){ // 头插
+
+void FreeList::PushFront(void* obj){ // 头插  obj的大小是确定的
 	NextObj(obj) = _head;
 	_head = obj;
-	_size += 1;
+	_n += 1;
 }
 
 void* FreeList::PopFront(){ // 头删
 	void* temp = _head;
 	_head = NextObj(_head);
-	_size -= 1;
+	NextObj(temp) = nullptr;
+	_n -= 1;
 	return temp;
 }
 
@@ -27,19 +29,19 @@ void* FreeList::PopFront(){ // 头删
 void FreeList::PushRange(void* start, void* end, size_t n){
 	NextObj(end) = _head;
 	_head = start;
-	_size += n;
+	_n += n;
 }
 
-// 弹出size个对象
-void FreeList::PopRange(void*& start, size_t size) {
+// 弹出n个对象
+void FreeList::PopRange(void*& start, size_t n) {
 	start = _head;
 	void* cur = _head;
-	for (int i = 0; i < size - 1; i++) {
+	for (size_t i = 0; i < n - 1; i++) {
 		cur = NextObj(cur);
 	}
 	_head = NextObj(cur);
 	NextObj(cur) = nullptr;
-
+	_n -= n;
 }
 
 
