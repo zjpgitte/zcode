@@ -1,12 +1,18 @@
 #pragma once 
 
 #include "Log.hpp"
+#include <sstream>
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <assert.h>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <cstring>
 
 
 enum{
@@ -27,7 +33,7 @@ class Sock{
       int sock = socket(AF_INET, SOCK_STREAM, 0);
       if (sock < 0) {
         //向日志打印错误信息
-        std::cout << "socket error!" << std::endl;
+        Log("Error", "socket Error!");
         exit(SocketErr);
 
       }
@@ -40,7 +46,7 @@ class Sock{
       int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)); 
       if (ret < 0) {
         // warning
-        std::cout << "set error!" << std::endl;
+        Log("warning", "setsockopt error!");
         exit(SetOptErr);
       }
     }
@@ -52,14 +58,14 @@ class Sock{
       local.sin_addr.s_addr = htons(INADDR_ANY);
       if (bind(sock, (struct sockaddr*)&local, sizeof(local)) < 0) {
         //log 
-        std::cout << "bind error!" << std::endl;
+        Log("Error", "Bind Error!");
         exit(BindErr);
       }
     }
 
     static void Listen(int sock){
       if(listen(sock, BACKLOG) < 0){
-        std::cout << "listen error!" << std::endl;
+        Log("Error", "Listen Error!");
         exit(ListenErr);
       } 
     }
@@ -70,11 +76,63 @@ class Sock{
       int s = accept(sock, (struct sockaddr*)&peer, &len);
       if (s < 0) {
         //log
-        std::cout << "accept error!" << std::endl;
+        Log("Warning", "Accept Error!");
       }
 
 
       return s;
     }
+
+    static std::string GetOneLine(int sock) {
+      // /n /r /r/n 
+      std::string line;
+      char c = 'x'; 
+      while (c != '\n'){
+          recv(sock, &c, 1, 0);
+          if (c == '\r') {
+            recv(sock, &c, 1, MSG_PEEK);
+            if (c == '\n') {
+              recv(sock, &c, 1, 0);
+            } 
+            else {
+              c = '\n';
+            }
+          }
+          
+          // c = '\n'或正常字符
+          line += c;
+      }
+      line.pop_back(); // 把'\n'弹出来
+
+      return line;
+    }
+
+    // 读取报头
+    static std::vector<std::string> GetRequestHeader(int sock) {
+        std::vector<std::string> head;
+        while (1) {
+          std::string line = GetOneLine(sock);
+          if (line == "") {
+            break;
+          }
+
+          head.push_back(move(line));
+        }
+
+        return head;
+    }
+
+    static std::string GetRequestBody(int sock, int contentLength) {
+        std::string body; 
+        for (int i = 0; i < contentLength; i++) {
+           char c; 
+           recv(sock, &c, 1, 0);
+           body += c;
+        } 
+
+        return body;
+
+    }
+
 
 };
