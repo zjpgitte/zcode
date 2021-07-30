@@ -87,15 +87,15 @@ class Request{
         return !strcasecmp(_method.c_str(), "POST");
     }
 
-    bool IsAddHomePage(std::string& queryPath) {
-      if (queryPath.back() == '/') {
-          queryPath += HOMEPAGE;
+    bool IsAddHomePage() {
+      if (_queryPath.back() == '/') {
+          _queryPath += HOMEPAGE;
           return true;
       } 
       return false;
     }
 
-    void GetQueryPathAndStringFromUri(std::string& queryPath, std::string queryParameter) {
+    void GetQueryPathAndStringFromUri() {
       if (IsGet()) {
           //从uri获得path和参数
           size_t pos = _uri.find('?'); 
@@ -118,10 +118,36 @@ class Request{
         assert(false);
       }
       //若路径以/结尾需要添加 index.html
-      IsAddHomePage(_queryPath);
-      queryPath = _queryPath;
-      queryParameter = _queryParameter;
+      IsAddHomePage();
     }
+
+    bool PathIsLegal() {
+        if (stat(_queryPath.c_str(), &_pathAttribution) == 0) {
+          return true;
+        }
+        else {
+          return false;
+        }
+    }
+        
+    bool PathIsDirectory() {
+        return S_ISDIR(_pathAttribution.st_mode); 
+    }
+    void PathAdd(const std::string& s) {
+        _queryPath += s;
+    }
+
+    bool PathIsBin() {
+        auto m = _pathAttribution.st_mode;
+        if (m & S_IXUSR || m & S_IXGRP || m & S_IXOTH) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+        
   private:
     std::string _method;
     std::string _uri;
@@ -131,13 +157,55 @@ class Request{
     std::string _body;
     std::string _queryPath = WEBROOT;
     std::string _queryParameter;
+    struct stat _pathAttribution;
 };
 
 class Response{
   public:
+    Response()
+      :_blank("\r\n")
+    {}
+
+    std::string CodeToDesc(const std::string code) {
+        int num = stoi(code);
+        std::string desc;
+        switch(num) {
+          case 200:
+              desc = "OK!";
+            break;
+          case 404:
+              desc = "Not Found!";
+            break;
+        }
+        return desc;
+    }
+
+    void MakeStatusLine(const std::string code) {
+        _statusLine += "HTTP/1.0";
+        _statusLine += " ";
+        _statusLine += code;
+        _statusLine += " ";
+        _statusLine += CodeToDesc(code);
+        _statusLine += "\r\n";
+
+    }
+
+    void MakeHeader() {
+
+    }
+
+    std::string& GetStatusLine() {
+        return _statusLine;
+    }
+
+    std::vector<std::string>& GetHeader() {
+        return _header;
+    }
 
   private:
-
+    std::string _statusLine;
+    std::vector<std::string> _header;
+    std::string _blank;
 };
 
 class EndPoint{
@@ -224,9 +292,9 @@ class EndPoint{
         //分析uri获取路径。
         // GET方法: uri有参数或者没有参数
         // POST方法: uri只有路径。参数在正文
-        std::string queryPath, queryParameter;
+        std::string code;
 
-        _req.GetQueryPathAndStringFromUri(queryPath, queryParameter);  
+        _req.GetQueryPathAndStringFromUri();  
 
 
         // 制作响应
@@ -234,10 +302,51 @@ class EndPoint{
         // Content-Length: 
         // Content-Type:
         // body
+        if (!_req.PathIsLegal()) {
+           code = "404"; 
+           _rsp.MakeStatusLine(code);
+           return;
+        }
+        
+        // 合法
+        if (_req.PathIsDirectory()) {
+            _req.PathAdd("/");
+            _req.IsAddHomePage();
+        }
+
+        
+        // 静态网页 cgi
+
     }
 
+    void SendStatusLine() {
+        std::string& line = _rsp.GetStatusLine();
+        send(_sock, line.c_str(), line.size(), 0);
+    }
+
+    void SendHeader() {
+        std::vector<std::string>& head = _rsp.GetHeader();
+        for (size_t i = 0; i < head.size(); i++) {
+            send(_sock, head[i].c_str(), head[i].size(), 0);  
+        }
+    }
+
+    void SendBody() {
+      if (_req.PathIsBin()) {
+         //cgi 
+        std::cout << "cgi" << std::endl;
+      } 
+      else {
+        //静态网页
+        std::cout << "uncgi" << std::endl;
+      }
+    }
     // 发送响应
-    void SendResponse();
+    void SendResponse() {
+      SendStatusLine();
+      SendHeader();
+      SendBody();
+    }
 
   private:
     int _sock;
@@ -265,7 +374,7 @@ class Entry{
 
       ep->HandlerAndMakeResponse();
       ep->PrintRequest();
-      //ep->SendResponse();
+      ep->SendResponse();
 
       delete ep; // 短链接
 
